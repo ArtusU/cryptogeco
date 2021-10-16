@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import CoinGecko from "coingecko-api";
 
@@ -27,7 +28,11 @@ export function Home() {
       {coins && (
         <ul>
           {coins.map((coin) => {
-            return <li key={coin.id}>{coin.id}</li>;
+            return (
+              <li key={coin.id}>
+                <Link to={`/${coin.id}/`}>{coin.id}</Link>
+              </li>
+            );
           })}
         </ul>
       )}
