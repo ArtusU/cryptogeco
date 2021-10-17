@@ -29,7 +29,7 @@ export function Home() {
         <ul>
           {coins.map((coin) => {
             return (
-              <li key={coin.id}>
+              <li key={coin.id} className="py-3 border border-gray-200">
                 <Link to={`/${coin.id}/`}>{coin.id}</Link>
               </li>
             );
