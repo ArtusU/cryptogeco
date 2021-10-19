@@ -1,12 +1,12 @@
 import { useParams } from "react-router";
-import { useEffect, useState } from "react";
-
-import { LineChart } from "./LineChart";
-
+import { useEffect, useState, useContext } from "react";
 import CoinGecko from "coingecko-api";
+import { LineChart } from "./LineChart";
+import { AuthContext } from "../context/AuthContext";
 
 export function Coin() {
   const { coinId } = useParams();
+  const { user } = useContext(AuthContext);
 
   const [labels, setLabels] = useState();
   const [priceData, setPriceData] = useState(null);
@@ -50,8 +50,14 @@ export function Coin() {
           <h4 className="text-xl text-gray-600">Loading...</h4>
         </div>
       )}
-      {priceData && labels && (
-        <LineChart labels={labels} coinId={coinId} priceData={priceData} />
+      {user ? (
+        <>
+          {priceData && labels && (
+            <LineChart labels={labels} coinId={coinId} priceData={priceData} />
+          )}
+        </>
+      ) : (
+        <h2>Please login to see the chart</h2>
       )}
     </div>
   );
