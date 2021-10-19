@@ -3,11 +3,13 @@ import { useEffect, useState, useContext } from "react";
 import CoinGecko from "coingecko-api";
 import { LineChart } from "./LineChart";
 import { AuthContext } from "../context/AuthContext";
+import { Loader } from "./Loader";
 
 export function Coin() {
   const { coinId } = useParams();
   const { user } = useContext(AuthContext);
 
+  const [coin, setCoin] = useState(null);
   const [labels, setLabels] = useState();
   const [priceData, setPriceData] = useState(null);
 
@@ -24,7 +26,7 @@ export function Coin() {
       return `${date.getFullYear()}/${date.getMonth()}/${date.getDate()}`;
     }
 
-    async function fetchCoin() {
+    async function fetchCoinMarketData() {
       const response = await CoinGeckoClient.coins.fetchMarketChartRange(
         coinId,
         {
@@ -39,25 +41,45 @@ export function Coin() {
       return response;
     }
 
-    fetchCoin();
-  }, [coinId]);
+    async function fetchCoin() {
+      const response = await CoinGeckoClient.coins.fetch(coinId);
+      setCoin(response.data);
+      return response;
+    }
+
+    if (user) {
+      fetchCoin();
+      fetchCoinMarketData();
+    }
+  }, [coinId, user]);
 
   return (
-    <div className="border-t border-gray-200 py-5">
-      <h2 className="py-5 text-2xl text-gray-800">{coinId}</h2>
-      {!priceData && (
-        <div className="bg-gray-100 rounded-sm py-5 text-center">
-          <h4 className="text-xl text-gray-600">Loading...</h4>
-        </div>
-      )}
+    <div>
       {user ? (
         <>
-          {priceData && labels && (
-            <LineChart labels={labels} coinId={coinId} priceData={priceData} />
+          {(!coin || !priceData) && <Loader />}
+          {coin && priceData && (
+            <>
+              <div className="flex items-center border-t border-gray-200 py-5">
+                <img
+                  src={coin.image.small}
+                  alt={coin.name}
+                  className="w-12 h-12"
+                />
+                <h2 className="ml-2 text-2xl text-gray-800">{coin.name}</h2>
+              </div>
+              {priceData && labels && (
+                <LineChart
+                  labels={labels}
+                  coinId={coinId}
+                  priceData={priceData}
+                />
+              )}
+            </>
           )}
         </>
       ) : (
-        <h2>Please login to see the chart</h2>
+        <p>You need to be logged in to view the chart</p>
       )}
     </div>
   );
